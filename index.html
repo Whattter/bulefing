@@ -379,7 +379,7 @@ const dayStreak=(function(){
 /* ---------- buddy ---------- */
 let sayT;
 function say(t,ms=3600){const b=$('#say');b.textContent=t;b.classList.add('on');$('#buddy').classList.add('up');clearTimeout(sayT);sayT=setTimeout(()=>{b.classList.remove('on');$('#buddy').classList.remove('up')},ms)}
-$('#buddy').addEventListener('click',()=>{const m=['Merhaba! Bir çıkıntıya tıkla.','Yanlış yapmak öğrenmenin parçası.','Bugün kaç soru çözdün?','İpucu almak ayıp değil.','Present Simple ile başla, kolay.'];say(m[Math.floor(Math.random()*m.length)])});
+$('#buddy').addEventListener('click',()=>{const m=['Merhaba! Bugün ne çalışıyoruz?','Yanlış yapmak öğrenmenin parçası.','Bugün kaç soru çözdün?','İpucu almak ayıp değil.','Present Simple ile başla, kolay.'];say(m[Math.floor(Math.random()*m.length)])});
 
 /* ---------- footer ---------- */
 $('#links').innerHTML=CONFIG.links.filter(l=>l.url&&l.url!=='#').map(l=>`<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)} <small>${esc(l.label)}</small></a></li>`).join('');
@@ -440,11 +440,11 @@ function recoHTML(){
   return ''}
 function welcome(){
   const nq=TOP.reduce((a,t)=>a+t.acts.reduce((b,x)=>b+x.q.length,0),0);
-  return shopCard()+`<h2>Hoş geldin</h2><p class="lead">Yukarıdaki çıkıntılardan birini seç. Gramerde boşluk doldurur, Kelime Avı'nda harfleri tahmin eder, Sözlük'te aradığın kelimenin anlamına bakarsın.</p>
+  return shopCard()+`<h2>Hoş geldin</h2><p class="lead">Yukarıdaki sekmelerden birini seç. Gramerde boşluk doldurur, Kelime Avı'nda harfleri tahmin eder, Sözlük'te aradığın kelimenin anlamına bakarsın.</p>
   <div class="facts"><div class="fact"><b>${TOP.length}</b><span>gramer konusu</span></div><div class="fact"><b>${nq}</b><span>alıştırma sorusu</span></div><div class="fact"><b>${WORDS.dict.length}</b><span>sözlükte kelime</span></div><div class="fact"><b>${dayStreak}</b><span>gün serisi</span></div></div>
   ${dailyHTML()}<div class="cta"><button class="btn gold" type="button" data-go="seviye-testi">${store.get('bf:level')?'Seviye testini tekrarla':'Seviye testini çöz (15 soru)'}</button>${store.get('bf:level')?'<span class="lvlchip">Seviyen: '+esc(store.get('bf:level').lv)+'</span>':''}</div>${recoHTML()}
   <div class="cta"><a class="btn ghost" href="#fiiller" style="text-decoration:none">Düzensiz fiiller listesi</a><a class="btn ghost" href="#ucretsiz-ornek" style="text-decoration:none">Ücretsiz ders örneği</a><a class="btn ghost" href="#ders-notlari" style="text-decoration:none">Ders notları</a></div>
-  <p class="note">Bir çıkıntıya tıkla, başlayalım.</p>`;
+  <p class="note">Küçük adımlar, büyük fark: günde 10 dakika yeter.</p>`;
 }
 
 /* ---------- grammar ---------- */
@@ -755,7 +755,7 @@ updBadge();
 /* ---------- start ---------- */
 (function(){
   if(!storageOk)setTimeout(()=>showAlert('Tarayıcın kayıt tutmaya izin vermiyor. Siteyi kullanabilirsin ama ilerlemen saklanmayacak.','err',0),1500);
-  $('#alertx').addEventListener('click',()=>$('#alert').classList.remove('on'));const h=location.hash.slice(1);if(TABS.includes(h)||ROUTES.includes(h))setTab(h,false);else if(h)go404();else render();setTimeout(()=>say('Merhaba! Bir çıkıntıya tıkla, başlayalım.',4200),900)})();
+  $('#alertx').addEventListener('click',()=>$('#alert').classList.remove('on'));const h=location.hash.slice(1);if(TABS.includes(h)||ROUTES.includes(h))setTab(h,false);else if(h)go404();else render();setTimeout(()=>say(['Merhaba! Bugün ne çalışıyoruz?','Hoş geldin! Bir konu seç, birlikte çözelim.','Selam! 10 dakikada bir şey öğrenelim mi?'][Math.floor(Math.random()*3)],4200),900)})();
 </script>
 
 </body>
