@@ -595,7 +595,7 @@ function pick(){
   const hl=p.filter(g=>hard[g.w]&&(!game.cur||g.w!==game.cur.g.w));
   const src=(hl.length&&Math.random()<0.4)?hl:(left.length?left:p);let g=src[Math.floor(Math.random()*src.length)];
   if(game.cur&&src.length>1)while(g.w===game.cur.g.w)g=src[Math.floor(Math.random()*src.length)];
-  game.cur={g,rev:new Set(),hints:0,done:false};game.typed='';
+  game.cur={g,rev:new Set(),hints:0,done:false};game.t=null;game.pos=-1;
 }
 function huntShell(){
   if(!game.cur||game.cur.g.l!==game.lv)pick();
@@ -608,31 +608,41 @@ function huntShell(){
     <div class="card"><h3>${game.lv} seviyesi</h3><div class="big" id="lvc">0</div><div class="prog"><i id="lvp"></i></div></div>
     <p class="tip">Ne kadar az ipucu, o kadar çok puan: 10 puandan başlar, her ipucu 2 puan götürür.</p></aside></div>`;
 }
+function ensureT(){
+  const c=game.cur,n=c.g.w.length;
+  if(!Array.isArray(game.t)||game.t.length!==n){game.t=Array(n).fill('');game.pos=-1}
+  for(const i of c.rev)game.t[i]='';
+  if(game.pos<0||game.pos>=n||c.rev.has(game.pos)){let k=-1;for(let i=0;i<n;i++)if(!c.rev.has(i)){if(k<0)k=i;if(!game.t[i]){k=i;break}}game.pos=k}
+}
 function slotsHTML(){
-  const c=game.cur,w=c.g.w,n=w.length,typed=game.typed||'';
-  const free=[];for(let i=0;i<n;i++)if(!c.rev.has(i))free.push(i);
-  const letters=Array(n).fill('');
-  for(const i of c.rev)letters[i]=w[i];
-  free.forEach((p,k)=>{if(typed[k])letters[p]=typed[k]});
-  const curPos=c.done?-1:(free[Math.min(typed.length,free.length-1)]??-1);
-  return letters.map((l,i)=>`<span class="slot ${c.rev.has(i)?'rev':''} ${c.done?'win':''} ${i===curPos?'cur':''}">${esc(l)}</span>`).join('');
+  const c=game.cur,w=c.g.w,n=w.length;ensureT();
+  return Array.from({length:n},(_,i)=>{const l=c.rev.has(i)?w[i]:game.t[i];return `<span class="slot ${c.rev.has(i)?'rev':''} ${c.done?'win':''} ${(!c.done&&i===game.pos)?'cur':''}" data-i="${i}">${esc(l)}</span>`}).join('')
 }
 function drawBoard(){
   const c=game.cur,g=c.g,w=g.w,n=w.length;
   const re=new RegExp(w,'i');
   const ex=(g.ex&&re.test(g.ex))?g.ex.replace(re,'_'.repeat(n)):('Tür: '+(g.p||'kelime')+' · '+n+' harf');
-  const free=[];for(let i=0;i<n;i++)if(!c.rev.has(i))free.push(i);
-  game.typed=(game.typed||'').slice(0,free.length);
-  const typed=game.typed;
   $('#board').innerHTML=`<div class="lab">Bu kelimenin anlamı:</div><div class="mean">${esc(g.tr)}</div><div class="exs">${esc(ex)}</div>
    <div class="slots" id="slots" aria-label="${n} harfli kelime">${slotsHTML()}</div>
-   <input class="ghostin" id="gin" type="text" maxlength="${Math.max(free.length,0)}" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Tahminin" value="${esc(typed.slice(0,free.length))}" ${c.done?'disabled':''}>
+   <input class="ghostin" id="gin" type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Tahminin" value="&#8203;" ${c.done?'disabled':''}>
    <div class="hbar">${c.done?'<button class="btn gold" id="next" type="button">Sonraki kelime</button><button class="btn ghost" type="button" data-df="save" data-v="'+esc(g.w)+'" style="color:var(--chalk);box-shadow:inset 0 0 0 2px var(--chalk)">'+(saved.includes(g.w)?'★ Defterde':'☆ Defterime ekle')+'</button>':'<button class="btn gold" id="chk" type="button">Kontrol et</button><button class="btn" id="hint" type="button">İpucu al ('+c.hints+')</button><button class="btn ghost" id="skip" type="button" style="color:var(--chalk);box-shadow:inset 0 0 0 2px var(--chalk)">Atla</button>'}</div>
    <div class="hmsg" id="hmsg"></div>`;
   $('#pts').textContent=game.pts;$('#str').textContent=game.streak;
   const done=Object.keys(game.solved[game.lv]||{}).length,tot=pool().length;$('#lvc').textContent=done+'/'+tot;$('#lvp').style.width=(100*done/tot)+'%';
 }
-function guess(){const c=game.cur,w=c.g.w,n=w.length,typed=(game.typed||'').replace(/[ıİ]/g,'i').toLowerCase();let k=0,out='';for(let i=0;i<n;i++){if(c.rev.has(i))out+=w[i];else out+=typed[k++]||'_'}return out}
+function guess(){const c=game.cur,w=c.g.w,n=w.length;ensureT();let out='';for(let i=0;i<n;i++){out+=c.rev.has(i)?w[i]:((game.t[i]||'_').replace(/[ıİ]/g,'i').toLowerCase())}return out}
+function nextFree(c,n,from){for(let i=from;i<n;i++)if(!c.rev.has(i))return i;return -1}
+function prevFree(c,from){for(let i=from;i>=0;i--)if(!c.rev.has(i))return i;return -1}
+function typeCh(raw){
+  const c=game.cur,n=c.g.w.length;ensureT();
+  const ch=raw.replace(/İ/g,'i').replace(/I/g,'i');if(!/^[a-zA-Zı]$/.test(ch)||game.pos<0)return;
+  game.t[game.pos]=ch.toLowerCase();const nx=nextFree(c,n,game.pos+1);if(nx>=0)game.pos=nx;
+}
+function backCh(){
+  const c=game.cur;ensureT();if(game.pos<0)return;
+  if(game.t[game.pos]){game.t[game.pos]='';return}
+  const pv=prevFree(c,game.pos-1);if(pv>=0){game.pos=pv;game.t[pv]=''}
+}
 function focusGin(){const g=$('#gin');if(!g||g.disabled)return;g.focus();try{const n=g.value.length;g.setSelectionRange(n,n)}catch(e){}}
 function wireHunt(){
   drawBoard();
@@ -640,15 +650,28 @@ function wireHunt(){
   sh.querySelectorAll('[data-lv]').forEach(b=>b.addEventListener('click',()=>{game.lv=b.dataset.lv;game.cur=null;saveGame();render();say('Seviye '+game.lv+', başlıyoruz!')}));
   const b=$('#board');
   b.addEventListener('click',e=>{
-    if(e.target.closest('#slots')&&$('#gin'))focusGin();
+    const inSlots=!!e.target.closest('#slots');const sl=e.target.closest('.slot');if(sl&&game.cur&&!game.cur.done){const i=+sl.dataset.i;if(!game.cur.rev.has(i)){ensureT();game.pos=i;$('#slots').innerHTML=slotsHTML()}}
+    if(inSlots&&$('#gin'))focusGin();
     if(e.target.closest('#hint'))hint();
     if(e.target.closest('#chk'))check();
     if(e.target.closest('#skip')){game.streak=0;saveGame();hard[game.cur.g.w]=(hard[game.cur.g.w]||0)+1;saveHard();pick();drawBoard();say('Bu kelime Defterim\'e eklendi, tekrar karşına çıkacak.',4200)}
     if(e.target.closest('#next')){pick();drawBoard();focusGin()}
   });
-  b.addEventListener('input',e=>{if(e.target.id==='gin'){const raw=e.target.value,v=raw.replace(/İ/g,'i').replace(/I/g,'i').replace(/[^a-zA-Zı]/g,'').replace(/[A-Z]/g,c=>c.toLowerCase());if(v!==raw){const pos=e.target.selectionStart-(raw.length-v.length);e.target.value=v;try{e.target.setSelectionRange(pos,pos)}catch(x){}}game.typed=v;$('#slots').innerHTML=slotsHTML();try{e.target.setSelectionRange(v.length,v.length)}catch(x){}}});
-  b.addEventListener('keydown',e=>{if(e.target.id!=='gin')return;if(e.key==='Enter'){e.preventDefault();check()}
-    else if(e.key==='Backspace'&&e.target.selectionStart===0&&e.target.selectionEnd===0&&e.target.value){e.preventDefault();const v=e.target.value.slice(0,-1);e.target.value=v;game.typed=v;$('#slots').innerHTML=slotsHTML();focusGin()}});
+  const redraw=()=>{$('#slots').innerHTML=slotsHTML()};
+  b.addEventListener('input',e=>{
+    if(e.target.id!=='gin')return;
+    const raw=e.target.value,s=raw.replace(/\u200b/g,'');
+    if(!raw.length)backCh();else for(const ch of s)typeCh(ch);
+    e.target.value='\u200b';try{e.target.setSelectionRange(1,1)}catch(x){}
+    redraw();
+  });
+  b.addEventListener('keydown',e=>{
+    if(e.target.id!=='gin')return;const c=game.cur;ensureT();
+    if(e.key==='Enter'){e.preventDefault();check()}
+    else if(e.key==='ArrowLeft'){e.preventDefault();const p=prevFree(c,game.pos-1);if(p>=0){game.pos=p;redraw()}}
+    else if(e.key==='ArrowRight'){e.preventDefault();const p=nextFree(c,c.g.w.length,game.pos+1);if(p>=0){game.pos=p;redraw()}}
+    else if(e.key==='Delete'){e.preventDefault();if(game.pos>=0){game.t[game.pos]='';redraw()}}
+  });
 }
 function hint(){
   const c=game.cur,n=c.g.w.length;if(c.rev.size>=n-1){$('#hmsg').textContent='Daha fazla ipucu kalmadı, bir şans daha dene.';return}
