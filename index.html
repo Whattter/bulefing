@@ -708,20 +708,22 @@ function dictShell(){
   <div class="dl" id="dl"></div><p class="ext" id="ext"></p>`;
 }
 function wireDict(){
-  let lv='Tümü';const dq=$('#dq');
+  let lv='Tümü',shown=120;const dq=$('#dq');
   const trn=s=>s.toLowerCase().replace(/ı/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/İ/gi,'i');
   function draw(){
     const q=trn(dq.value.trim());
     const list=WORDS.dict.filter(d=>(lv==='Tümü'||d.l===lv)&&(!q||d.w.toLowerCase().includes(q)||trn(d.t).includes(q)));
     let h='',last='';
-    for(const d of list){const L=d.w[0].toUpperCase();if(L!==last){h+=`<h4>${L}</h4>`;last=L}
+    for(const d of list.slice(0,shown)){const L=d.w[0].toUpperCase();if(L!==last){h+=`<h4>${L}</h4>`;last=L}
       h+=`<div class="de"><span class="w">${esc(d.w)}<em>${esc(d.p)}</em><button class="star" type="button" data-df="save" data-v="${esc(d.w)}" aria-label="Defterime ekle" title="Defterime ekle">${saved.includes(d.w)?'★':'☆'}</button></span><span class="t">${esc(d.t)}</span>${d.e?`<span class="x">${esc(d.e)}</span>`:''}<span class="lvl">${d.l}</span></div>`}
+    if(list.length>shown)h+=`<p style="text-align:center"><button class="btn ghost" type="button" id="dmore">Daha fazla göster (${list.length-shown} kelime daha)</button></p>`;
     $('#dl').innerHTML=h||'<p class="lead">Bu kelime listemizde yok.</p>';
     const raw=dq.value.trim();
     $('#ext').innerHTML=raw?`${list.length} sonuç. Aradığını bulamadın mı? <a href="https://tureng.com/tr/turkce-ingilizce/${encodeURIComponent(raw)}" target="_blank" rel="noopener">Tureng'de ara</a>`:`${list.length} kelime listeleniyor.`;
   }
-  dq.addEventListener('input',draw);
-  $('#dlv').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;lv=b.dataset.l;document.querySelectorAll('#dlv button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));draw()});
+  dq.addEventListener('input',()=>{shown=120;draw()});
+  $('#dl').addEventListener('click',e=>{if(e.target.id==='dmore'){shown+=300;draw()}});
+  $('#dlv').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;lv=b.dataset.l;document.querySelectorAll('#dlv button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));shown=120;draw()});
   draw();
 }
 
