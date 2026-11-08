@@ -334,7 +334,7 @@ const TOP=DATA.topics, RULES=DATA.rules;
 (function(){
   const have=new Set(WORDS.game.map(g=>g.w.toLowerCase()));
   WORDS.dict.forEach(d=>{
-    if(have.has(d.w.toLowerCase())||!/^[a-zA-Z]{3,}$/.test(d.w))return;
+    if(have.has(d.w.toLowerCase())||!/^[a-zA-Z]{3,}$/.test(d.w)||/^\s*[-\u2013(]/.test(d.t||''))return;
     WORDS.game.push({w:d.w,tr:d.t,ex:'',p:d.p,l:d.l});
   });
   WORDS.game.forEach(g=>{if(!g.p){const x=WORDS.dict.find(d=>d.w.toLowerCase()===g.w.toLowerCase());g.p=x?x.p:''}});
