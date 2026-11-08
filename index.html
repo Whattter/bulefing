@@ -382,7 +382,7 @@ function say(t,ms=3600){const b=$('#say');b.textContent=t;b.classList.add('on');
 $('#buddy').addEventListener('click',()=>{const m=['Merhaba! Bir çıkıntıya tıkla.','Yanlış yapmak öğrenmenin parçası.','Bugün kaç soru çözdün?','İpucu almak ayıp değil.','Present Simple ile başla, kolay.'];say(m[Math.floor(Math.random()*m.length)])});
 
 /* ---------- footer ---------- */
-$('#links').innerHTML=CONFIG.links.map(l=>`<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)} <small>${esc(l.label)}</small></a></li>`).join('');
+$('#links').innerHTML=CONFIG.links.filter(l=>l.url&&l.url!=='#').map(l=>`<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)} <small>${esc(l.label)}</small></a></li>`).join('');
 $('#mailtxt').textContent=CONFIG.email;
 $('#copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(CONFIG.email);$('#copy').textContent='Kopyalandı'}catch(e){const r=document.createRange();r.selectNodeContents($('#mailtxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#copy').textContent='Seçildi'}setTimeout(()=>$('#copy').textContent='Kopyala',1800)});
 
