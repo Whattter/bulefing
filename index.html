@@ -397,8 +397,10 @@ function setTab(t,scroll){
 }
 try{localStorage.setItem('bf:t','1');localStorage.removeItem('bf:t')}catch(e){setTimeout(()=>showAlert('403 · Tarayıcın kayda izin vermiyor. İlerlemen sayfayı kapatınca silinir.','err',9000),1500)}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.tab;if(location.hash!=='#'+t)history.replaceState(null,'','#'+t);setTab(t,true)}));
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.footlinks a, .cta a[href^="#"], .topbar a[href^="#"]'))toTop()});
 function go404(){st={tab:'404',topic:null,act:null,checked:false,custom:null};document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected','false'));render();say('Hmm, burada bir şey yok.',3000)}
-addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(TABS.includes(h)||ROUTES.includes(h)){if(h!==st.tab)setTab(h,false)}else if(h)go404();else{st={tab:null,topic:null,act:null,checked:false,custom:null};document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected','false'));render()}});
+const toTop=()=>{try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}};
+addEventListener('hashchange',()=>{toTop();const h=location.hash.slice(1);if(TABS.includes(h)||ROUTES.includes(h)){if(h!==st.tab)setTab(h,false)}else if(h)go404();else{st={tab:null,topic:null,act:null,checked:false,custom:null};document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected','false'));render()}});
 
 function render(){
   try{_render()}catch(err){
