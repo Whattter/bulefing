@@ -396,7 +396,9 @@ function setTab(t,scroll){
   if(scroll){const e=$('.tabs');e.scrollIntoView({block:'start',behavior:'smooth'})}
 }
 try{localStorage.setItem('bf:t','1');localStorage.removeItem('bf:t')}catch(e){setTimeout(()=>showAlert('403 · Tarayıcın kayda izin vermiyor. İlerlemen sayfayı kapatınca silinir.','err',9000),1500)}
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.tab;if(location.hash!=='#'+t)history.replaceState(null,'','#'+t);setTab(t,true)}));
+function goHome(){history.replaceState(null,'',location.pathname+location.search);st={tab:null,topic:null,act:null,checked:false,custom:null};document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected','false'));render();toTop()}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.tab;if(st.tab===t&&!st.topic&&!st.act){goHome();return}if(location.hash!=='#'+t)history.replaceState(null,'','#'+t);setTab(t,false);toTop()}));
+const mk=document.querySelector('.mark');if(mk){mk.style.cursor='pointer';mk.setAttribute('role','link');mk.setAttribute('tabindex','0');mk.setAttribute('aria-label','Bulefing ana sayfa');mk.addEventListener('click',goHome);mk.addEventListener('keydown',e=>{if(e.key==='Enter')goHome()})}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('.footlinks a, .cta a[href^="#"], .topbar a[href^="#"]'))toTop()});
 function go404(){st={tab:'404',topic:null,act:null,checked:false,custom:null};document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected','false'));render();say('Hmm, burada bir şey yok.',3000)}
 const toTop=()=>{try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}};
