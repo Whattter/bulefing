@@ -160,7 +160,7 @@ ol.qs{list-style:none;margin:18px 0 0;padding:0}
 .chip button{background:var(--ink);color:var(--paper);border:0;border-radius:50%;width:22px;height:22px;line-height:1;font-size:.8rem;padding:0}
 .note-saved{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:12px 14px;background:#fff3b8;border:2px solid var(--ink);border-radius:6px 16px 6px 16px;font-weight:700}
 .note-saved button{border:0;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 14px;font-weight:800}
-.bd{display:inline-grid;place-items:center;min-width:1.35em;height:1.35em;border-radius:99px;background:var(--orange);color:#fff;font-size:.72em;margin-left:5px;padding:0 5px;vertical-align:middle}
+.bd{display:inline-grid;place-items:center;min-width:1.35em;height:1.35em;border-radius:99px;background:#e5251b;color:#fff;font-size:.72em;margin-left:4px;padding:0 5px;vertical-align:middle;white-space:nowrap;flex:none}
 .alert{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top,0px));transform:translate(-50%,-140%);z-index:50;width:min(560px,calc(100vw - 32px));background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:6px 16px 6px 16px;padding:10px 14px;font-weight:700;box-shadow:0 8px 0 rgba(0,0,0,.25);transition:transform .3s;display:flex;gap:10px;align-items:center}
 .alert.on{transform:translate(-50%,0)}
 .alert.err{border-color:var(--bad)}.alert.ok{border-color:var(--good)}
@@ -364,8 +364,8 @@ let st={tab:null,topic:null,act:null,checked:false,custom:null};
 TOP.forEach((t,ti)=>t.acts.forEach((a,ai)=>a.q.forEach((q,qi)=>{q.k=ti+':'+ai+':'+qi})));
 let wrong=clean(store.get('bf:wrong'),{}), hard=clean(store.get('bf:hard'),{}), saved=store.get('bf:saved')||[];
 if(!Array.isArray(saved))saved=[];
-function updBadge(){const n=Object.keys(wrong).length+Object.keys(hard).length;const b=document.getElementById('t-defter');if(b)b.innerHTML='Defterim'+(n?'<span class="bd">'+n+'</span>':'')}
-const saveWrong=()=>{store.set('bf:wrong',wrong);updBadge()}, saveHard=()=>{store.set('bf:hard',hard);updBadge()}, saveSaved=()=>store.set('bf:saved',saved);
+function updBadge(){const n=Object.keys(wrong).length+Object.keys(hard).length+saved.length;const b=document.getElementById('t-defter');if(b)b.innerHTML='Defterim'+(n?'<span class="bd">'+n+'</span>':'')}
+const saveWrong=()=>{store.set('bf:wrong',wrong);updBadge()}, saveHard=()=>{store.set('bf:hard',hard);updBadge()}, saveSaved=()=>{store.set('bf:saved',saved);updBadge()};
 function curAct(){
   if(st.custom)return {t:{id:'x',name:'Defterim'},a:st.custom,custom:true};
   const t=TOP[st.topic];return {t,a:t.acts[st.act],custom:false};
